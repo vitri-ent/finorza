@@ -1,0 +1,132 @@
+plugins {
+	id "fabric-loom" version "1.3-SNAPSHOT"
+	id "com.google.protobuf" version "0.9.4"
+}
+
+version = project.mod_version
+group = project.maven_group
+
+base {
+	archivesName = project.archives_base_name
+}
+
+repositories {
+	mavenCentral()
+	maven {
+		name = "ParchmentMC"
+		url = "https://maven.parchmentmc.org"
+	}
+	maven {
+		url "https://maven.terraformersmc.com/releases/"
+		content {
+			includeGroup "com.terraformersmc"
+		}
+	}
+}
+
+loom {
+	accessWidenerPath = file("src/main/resources/finorza.accesswidener")
+}
+
+dependencies {
+	minecraft("com.mojang:minecraft:${project.minecraft_version}")
+	mappings(loom.layered() {
+		officialMojangMappings()
+		parchment("org.parchmentmc.data:parchment-1.16.5:2022.03.06@zip")
+	})
+	modImplementation("net.fabricmc:fabric-loader:${project.loader_version}")
+	modImplementation("net.fabricmc.fabric-api:fabric-api:${project.fabric_version}")
+
+	implementation("com.google.code.gson:gson:2.10.1")
+	implementation("org.lwjgl:lwjgl:3.2.2")
+
+	modCompileOnly("com.terraformersmc:modmenu:1.16.23") { transitive(false) }
+	modRuntimeOnly("com.terraformersmc:modmenu:1.16.23") { transitive(false) }
+
+	implementation("io.grpc:grpc-netty-shaded:${project.grpc_version}") { exclude group: 'com.google.guava', module: 'guava' }
+	implementation("io.grpc:grpc-protobuf:${project.grpc_version}") { exclude group: 'com.google.guava', module: 'guava' }
+	implementation("io.grpc:grpc-services:${project.grpc_version}") { exclude group: 'com.google.guava', module: 'guava' }
+	implementation("io.grpc:grpc-stub:${project.grpc_version}") { exclude group: 'com.google.guava', module: 'guava' }
+	compileOnly("org.apache.tomcat:annotations-api:6.0.53")
+
+	// Whole bunch of bullshit to make the mod jar work
+	implementation("com.google.protobuf:protobuf-java:${project.protobuf_version}")
+	implementation("io.grpc:grpc-context:${project.grpc_version}") { exclude group: 'com.google.guava', module: 'guava' }
+	implementation("io.grpc:grpc-protobuf-lite:${project.grpc_version}") { exclude group: 'com.google.guava', module: 'guava' }
+	implementation("io.grpc:grpc-api:${project.grpc_version}") { exclude group: 'com.google.guava', module: 'guava' }
+	implementation("io.grpc:grpc-core:${project.grpc_version}") { exclude group: 'com.google.guava', module: 'guava' }
+	implementation("io.perfmark:perfmark-api:0.26.0")
+	compileOnly("com.google.guava:guava:32.0.1-jre")
+	// include gRPC dependencies in output JAR
+	include("com.google.protobuf:protobuf-java:${project.protobuf_version}")
+	include("io.grpc:grpc-context:${project.grpc_version}")
+	include("io.grpc:grpc-core:${project.grpc_version}")
+	include("io.grpc:grpc-protobuf-lite:${project.grpc_version}")
+	include("io.grpc:grpc-api:${project.grpc_version}")
+	include("io.grpc:grpc-netty-shaded:${project.grpc_version}")
+	include("io.grpc:grpc-protobuf:${project.grpc_version}")
+	include("io.grpc:grpc-services:${project.grpc_version}")
+	include("io.grpc:grpc-stub:${project.grpc_version}")
+	// include("org.openpnp:opencv:4.7.0-0")
+	include("io.perfmark:perfmark-api:0.26.0")
+}
+
+processResources {
+	inputs.property("version", project.version)
+
+	filesMatching("fabric.mod.json") {
+		expand("version": project.version)
+	}
+}
+
+build.dependsOn(processResources)
+
+java {
+	// Loom will automatically attach sourcesJar to a RemapSourcesJar task and to the "build" task
+	// if it is present.
+	// If you remove this line, sources will not be generated.
+	// withSourcesJar()
+
+	sourceCompatibility = JavaVersion.VERSION_17
+	targetCompatibility = JavaVersion.VERSION_17
+}
+
+sourceSets {
+	src {
+		main {
+			java {
+				srcDirs("build/generated/source/proto/main/grpc")
+				srcDirs("build/generated/source/proto/main/java")
+			}
+		}
+	}
+}
+
+protobuf {
+	generateProtoTasks {
+		all().configureEach { task ->
+			task.builtins {
+				// Generates Python code
+				python {}
+			}
+			task.plugins {
+				grpc {}
+			}
+		}
+	}
+	protoc {
+		artifact = "com.google.protobuf:protoc:${project.protobuf_version}"
+	}
+	plugins {
+		grpc {
+			artifact = "io.grpc:protoc-gen-grpc-java:${project.grpc_version}"
+		}
+	}
+}
+
+// ensure that the encoding is set to UTF-8, no matter what the system default is
+// this fixes some edge cases with special characters not displaying correctly
+// see http://yodaconditions.net/blog/fix-for-java-file-encoding-problems-with-gradle.html
+tasks.withType(JavaCompile).configureEach {
+	options.encoding = "UTF-8"
+}

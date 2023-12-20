@@ -1,0 +1,14 @@
+{
+	"finorza-inference.option.synchronizeIntegratedServer": "Sync ticks: %s",
+	"finorza-inference.option.synchronizeIntegratedServer.false": "OFF",
+	"finorza-inference.option.synchronizeIntegratedServer.true": "ON",
+	"finorza-inference.option.cursorSize": "Cursor size: %s",
+	"finorza-inference.option.cursorSize.px_4": "4x4",
+	"finorza-inference.option.cursorSize.px_8": "8x8",
+	"finorza-inference.option.cursorSize.px_16": "16x16",
+	"finorza-inference.option.windowSize": "Window size: %s",
+	"finorza-inference.option.windowSize.r_360": "360p",
+	"finorza-inference.option.windowSize.r_480": "480p",
+	"finorza-inference.option.windowSize.r_720": "720p",
+	"finorza-inference.option.windowSize.r_1080": "1080p"
+}

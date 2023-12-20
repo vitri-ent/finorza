@@ -1,0 +1,29 @@
+{
+	"schemaVersion": 1,
+	"id": "finorza-inference",
+	"version": "${version}",
+	"name": "Finorza Inference",
+	"description": "Interface for VITRI Project",
+	"authors": [
+		"pyke.io"
+	],
+	"environment": "client",
+	"license": "PROPRIETARY",
+	"entrypoints": {
+		"client": [
+			"io.pyke.vitri.finorza.inference.FinorzaInference"
+		],
+		"modmenu": [
+			"io.pyke.vitri.finorza.inference.FinorzaInferenceConfigMenu"
+		]
+	},
+	"icon": "assets/icon.png",
+	"mixins": [
+		"finorza.mixins.json"
+	],
+	"accessWidener": "finorza.accesswidener",
+	"depends": {
+		"fabricloader": ">=0.8.0",
+		"minecraft": "=1.16.5"
+	}
+}

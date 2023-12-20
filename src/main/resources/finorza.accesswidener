@@ -1,0 +1,7 @@
+accessWidener v2 named
+
+accessible method net/minecraft/server/MinecraftServer haveTime ()Z
+accessible method net/minecraft/server/MinecraftServer waitUntilNextTick ()V
+
+accessible field net/minecraft/server/MinecraftServer isReady Z
+accessible field net/minecraft/server/MinecraftServer mayHaveDelayedTasks Z
