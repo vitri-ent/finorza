@@ -1,7 +1,6 @@
 package io.pyke.vitri.finorza.inference.config;
 
-import com.google.gson.JsonObject;
-import com.google.gson.JsonPrimitive;
+import com.google.gson.*;
 import io.pyke.vitri.finorza.inference.FinorzaInference;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.util.GsonHelper;
@@ -14,6 +13,11 @@ import java.lang.reflect.Type;
 import java.util.Locale;
 
 public class ConfigManager {
+	private static final Gson GSON = new GsonBuilder()
+			.setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
+			.setPrettyPrinting()
+			.create();
+
 	private static File file;
 
 	private static void prepareConfigFile() {
@@ -108,7 +112,7 @@ public class ConfigManager {
 			e.printStackTrace();
 		}
 
-		String jsonString = FinorzaInference.GSON.toJson(config);
+		String jsonString = GSON.toJson(config);
 
 		try (FileWriter fileWriter = new FileWriter(file)) {
 			fileWriter.write(jsonString);

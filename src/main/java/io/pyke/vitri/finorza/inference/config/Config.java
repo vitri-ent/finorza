@@ -11,7 +11,7 @@ import net.minecraft.client.gui.screens.GenericDirtMessageScreen;
 import net.minecraft.client.gui.screens.TitleScreen;
 import net.minecraft.network.chat.TextComponent;
 
-import io.pyke.vitri.finorza.inference.api.IWindow;
+import io.pyke.vitri.finorza.inference.mixin.render.WindowAccessor;
 import io.pyke.vitri.finorza.inference.gui.ModOptionsScreen;
 
 public class Config {
@@ -28,7 +28,7 @@ public class Config {
 		"cursorSize", CursorSize.PX_16);
 	public static final EnumConfigOption<WindowSize> WINDOW_SIZE = new EnumConfigOption<>(
 		"windowSize", WindowSize.R_360, (ignored, value) -> {
-		((IWindow) (Object) Minecraft.getInstance().getWindow()).vitri$resize(
+		((WindowAccessor) (Object) Minecraft.getInstance().getWindow()).vitri$resize(
 			value.width, value.height);
 	});
 

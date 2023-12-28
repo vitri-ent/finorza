@@ -1,28 +1,29 @@
 package io.pyke.vitri.finorza.inference;
 
-import java.io.IOException;
-
-import com.google.gson.FieldNamingPolicy;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
+import io.grpc.ServerBuilder;
+import io.grpc.protobuf.services.ProtoReflectionService;
+import io.pyke.vitri.finorza.inference.rpc.RemoteControlService;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 
-import io.pyke.vitri.finorza.inference.api.RemoteControlServer;
+import java.io.IOException;
 
 @Environment(EnvType.CLIENT)
 public class FinorzaInference implements ClientModInitializer {
-	public static final String MOD_ID = "finorza-inference";
-	public static final Gson GSON = new GsonBuilder().setFieldNamingPolicy(
-		FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES).setPrettyPrinting().create();
+    public static final int PORT = 24351;
+    public static final String MOD_ID = "finorza-inference";
 
-	@Override
-	public void onInitializeClient() {
-		try {
-			RemoteControlServer.getInstance().start();
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		}
-	}
+    @Override
+    public void onInitializeClient() {
+        try {
+            ServerBuilder.forPort(PORT)
+                    .addService(new RemoteControlService())
+                    .addService(ProtoReflectionService.newInstance())
+                    .build()
+                    .start();
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to start gRPC server", e);
+        }
+    }
 }

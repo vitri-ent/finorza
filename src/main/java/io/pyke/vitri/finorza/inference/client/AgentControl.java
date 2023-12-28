@@ -1,9 +1,5 @@
 package io.pyke.vitri.finorza.inference.client;
 
-import java.nio.ByteBuffer;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Consumer;
-
 import com.mojang.blaze3d.pipeline.RenderCall;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.Minecraft;
@@ -12,12 +8,16 @@ import net.minecraft.client.gui.screens.GenericDirtMessageScreen;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 
-import io.pyke.vitri.finorza.inference.api.Producer;
+import java.nio.ByteBuffer;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 public class AgentControl {
 	public static final Minecraft minecraft = Minecraft.getInstance();
 	public static final ByteBuffer frameResizeBuffer = ByteBuffer.allocateDirect(
-		EnvironmentRecorder.ML_WIDTH * EnvironmentRecorder.ML_HEIGHT * 3);
+			EnvironmentRecorder.ML_WIDTH * EnvironmentRecorder.ML_HEIGHT * 3
+	);
 	private static boolean humanControl = true;
 
 	public static void dispatchMainThread(RenderCall call) {
@@ -54,11 +54,9 @@ public class AgentControl {
 		humanControl = enable;
 	}
 
-	public static <T> void dispatchAndAwait(Producer<T> producer, Consumer<T> consumer) {
+	public static <T> void dispatchAndAwait(Supplier<T> supplier, Consumer<T> consumer) {
 		final AtomicReference<T> ref = new AtomicReference<>();
-		AgentControl.dispatchMainThread(() -> {
-			ref.set(producer.produce());
-		});
+		AgentControl.dispatchMainThread(() -> ref.set(supplier.get()));
 		while (true) {
 			T t = ref.get();
 			if (t != null) {
