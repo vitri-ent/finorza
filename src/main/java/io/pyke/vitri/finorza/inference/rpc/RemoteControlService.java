@@ -2,13 +2,15 @@ package io.pyke.vitri.finorza.inference.rpc;
 
 import com.google.protobuf.ByteString;
 import com.google.protobuf.Empty;
+import com.mojang.blaze3d.systems.RenderSystem;
 import io.grpc.stub.StreamObserver;
+import io.pyke.vitri.finorza.inference.gui.ConnectScreenWithCallback;
 import io.pyke.vitri.finorza.inference.mixin.input.KeyboardHandlerAccessor;
 import io.pyke.vitri.finorza.inference.mixin.input.MouseHandlerAccessor;
-import io.pyke.vitri.finorza.inference.client.AgentControl;
-import io.pyke.vitri.finorza.inference.client.EnvironmentRecorder;
-import io.pyke.vitri.finorza.inference.gui.ConnectScreenWithCallback;
 import io.pyke.vitri.finorza.inference.rpc.proto.v1.*;
+import io.pyke.vitri.finorza.inference.util.Controller;
+import io.pyke.vitri.finorza.inference.util.LevelUtil;
+import io.pyke.vitri.finorza.inference.util.Screenshot;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.ChatScreen;
 import net.minecraft.client.gui.screens.TitleScreen;
@@ -20,22 +22,26 @@ import net.minecraft.world.level.storage.LevelSummary;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 
 public class RemoteControlService extends RemoteControlServiceGrpc.RemoteControlServiceImplBase {
-    private final Minecraft client;
+    private final Screenshot screenshot;
+    private final Minecraft minecraft;
     private ActRequest lastAction = null;
 
     public RemoteControlService() {
-        this(Minecraft.getInstance());
+        this(new Screenshot(), Minecraft.getInstance());
     }
 
-    public RemoteControlService(@NotNull Minecraft client) {
-        this.client = client;
+    public RemoteControlService(@NotNull Screenshot screenshot, @NotNull Minecraft minecraft) {
+        this.screenshot = screenshot;
+        this.minecraft = minecraft;
     }
 
     private static int vitriKeyToCode(Key key) {
@@ -68,7 +74,7 @@ public class RemoteControlService extends RemoteControlServiceGrpc.RemoteControl
     public void listWorlds(Empty request, StreamObserver<ListWorldsResponse> response) {
         try {
             final List<World> worlds = new ArrayList<>();
-            for (final LevelSummary level : client.getLevelSource().getLevelList()) {
+            for (final LevelSummary level : minecraft.getLevelSource().getLevelList()) {
                 final World world = World.newBuilder()
                         .setIcon(ByteString.copyFrom(Files.readAllBytes(level.getIcon().toPath())))
                         .setName(level.getLevelName())
@@ -87,9 +93,9 @@ public class RemoteControlService extends RemoteControlServiceGrpc.RemoteControl
 
     @Override
     public void enterWorld(EnterWorldRequest request, StreamObserver<Empty> response) {
-        if (client.getLevelSource().levelExists(request.getId())) {
-            AgentControl.dispatchMainThread(() -> {
-                AgentControl.loadLevel(request.getId());
+        if (this.minecraft.getLevelSource().levelExists(request.getId())) {
+            this.minecraft.execute(() -> {
+                LevelUtil.load(request.getId());
                 response.onNext(Empty.getDefaultInstance());
                 response.onCompleted();
             });
@@ -100,52 +106,56 @@ public class RemoteControlService extends RemoteControlServiceGrpc.RemoteControl
 
     @Override
     public void enterServer(EnterServerRequest request, StreamObserver<Empty> response) {
-        AgentControl.dispatchMainThread(() -> {
-            AgentControl.disconnect();
-            client.setScreen(new ConnectScreenWithCallback(new TitleScreen(), client, new ServerData(
-                    I18n.get("selectServer.defaultName"), request.getAddr(), false),
-                    response::onError,
-                    (c) -> {
-                        response.onNext(Empty.getDefaultInstance());
-                        response.onCompleted();
-                    }
-            ));
+        this.minecraft.execute(() -> {
+            LevelUtil.load(null);
+            this.minecraft.setScreen(
+                    new ConnectScreenWithCallback(
+                            new TitleScreen(),
+                            this.minecraft,
+                            new ServerData(I18n.get("selectServer.defaultName"), request.getAddr(), false),
+                            response::onError,
+                            (c) -> {
+                                response.onNext(Empty.getDefaultInstance());
+                                response.onCompleted();
+                            }
+                    ));
         });
     }
 
     @Override
     public void updateHumanControl(UpdateHumanControlRequest request, StreamObserver<Empty> response) {
-        AgentControl.setHumanControl(request.getEnabled());
+        Controller.getInstance().setHumanControl(request.getEnabled());
         response.onNext(Empty.getDefaultInstance());
         response.onCompleted();
     }
 
     @Override
     public void observe(Empty request, StreamObserver<ObserveResponse> response) {
-        final boolean isGuiOpen = client.screen != null;
-        final boolean isPaused = isGuiOpen && !(client.screen instanceof ChatScreen || client.screen instanceof AbstractContainerScreen<?>);
+        final boolean isGuiOpen = minecraft.screen != null;
+        final boolean isPaused = isGuiOpen && !(minecraft.screen instanceof ChatScreen || minecraft.screen instanceof AbstractContainerScreen<?>);
         final ObserveResponse.Builder builder = ObserveResponse.newBuilder()
                 .setDone(false)
                 .setGuiOpen(isGuiOpen)
-                .setPaused(isPaused || !AgentControl.hasAgentControl());
+                .setPaused(isPaused || !Controller.getInstance().hasAgentControl());
 
         if (!isPaused) {
-            final EnvironmentRecorder recorder = EnvironmentRecorder.getInstance();
-            AgentControl.dispatchAndAwait(recorder::getFrame, (frame) -> {
-                builder.setData(ByteString.copyFrom(AgentControl.resizeFrame(frame)));
-                response.onNext(builder.build());
-                response.onCompleted();
-            });
-        } else {
-            response.onNext(builder.build());
-            response.onCompleted();
+            synchronized (this.screenshot) {
+                final CompletableFuture<ByteBuffer> frameFuture = new CompletableFuture<>();
+                RenderSystem.recordRenderCall(() -> frameFuture.complete(this.screenshot.read()));
+
+                frameFuture.join(); // just join onto the gRPC thread
+                builder.setData(ByteString.copyFrom(this.screenshot.resize()));
+            }
         }
+
+        response.onNext(builder.build());
+        response.onCompleted();
     }
 
     @Override
     public void act(ActRequest request, StreamObserver<Empty> response) {
         final Camera camera = request.getMouse().getCamera();
-        ((MouseHandlerAccessor) client.mouseHandler).vitri$onMove(camera.getDx(), camera.getDy());
+        ((MouseHandlerAccessor) minecraft.mouseHandler).vitri$onMove(camera.getDx(), camera.getDy());
 
         final List<Key> keys = request.getKeyboard().getKeyList();
         final Set<Key> releasedKeys = new HashSet<>();
@@ -165,10 +175,10 @@ public class RemoteControlService extends RemoteControlServiceGrpc.RemoteControl
         }
 
         for (final Key key : newlyHitKeys) {
-            ((KeyboardHandlerAccessor) client.keyboardHandler).vitri$onKey(vitriKeyToCode(key), 0, 1, mods);
+            ((KeyboardHandlerAccessor) minecraft.keyboardHandler).vitri$onKey(vitriKeyToCode(key), 0, 1, mods);
         }
         for (final Key key : releasedKeys) {
-            ((KeyboardHandlerAccessor) client.keyboardHandler).vitri$onKey(vitriKeyToCode(key), 0, 0, mods);
+            ((KeyboardHandlerAccessor) minecraft.keyboardHandler).vitri$onKey(vitriKeyToCode(key), 0, 0, mods);
         }
 
         final List<MouseButton> buttons = request.getMouse().getButtonList();
@@ -182,10 +192,10 @@ public class RemoteControlService extends RemoteControlServiceGrpc.RemoteControl
         }
 
         for (final MouseButton button : pressedButtons) {
-            ((MouseHandlerAccessor) client.mouseHandler).vitri$onPress(button.getNumber(), 1, mods);
+            ((MouseHandlerAccessor) minecraft.mouseHandler).vitri$onPress(button.getNumber(), 1, mods);
         }
         for (final MouseButton button : releasedButtons) {
-            ((MouseHandlerAccessor) client.mouseHandler).vitri$onPress(button.getNumber(), 0, mods);
+            ((MouseHandlerAccessor) minecraft.mouseHandler).vitri$onPress(button.getNumber(), 0, mods);
         }
 
         this.lastAction = request;

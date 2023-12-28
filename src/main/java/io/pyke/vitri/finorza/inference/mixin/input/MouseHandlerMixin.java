@@ -1,6 +1,6 @@
 package io.pyke.vitri.finorza.inference.mixin.input;
 
-import io.pyke.vitri.finorza.inference.client.AgentControl;
+import io.pyke.vitri.finorza.inference.util.Controller;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.MouseHandler;
 import org.objectweb.asm.Opcodes;
@@ -19,8 +19,9 @@ public abstract class MouseHandlerMixin implements MouseHandlerAccessor {
 
     @Unique
     private boolean useOriginalMethod = false;
+
     @Unique
-    private Set<Integer> buttonsPressed = new HashSet<>();
+    private final Set<Integer> buttonsPressed = new HashSet<>();
 
     @Shadow
     public abstract double xpos();
@@ -49,7 +50,8 @@ public abstract class MouseHandlerMixin implements MouseHandlerAccessor {
         } else {
             buttonsPressed.add(button);
         }
-        if (!useOriginalMethod && AgentControl.hasAgentControl()) {
+
+        if (!useOriginalMethod && Controller.getInstance().hasAgentControl()) {
             ci.cancel();
         }
     }
@@ -61,7 +63,7 @@ public abstract class MouseHandlerMixin implements MouseHandlerAccessor {
 
     @Inject(method = "onScroll(JDD)V", at = @At(value = "HEAD"), cancellable = true)
     private void injectOnScroll(long handle, double xoffset, double yoffset, CallbackInfo ci) {
-        if (!useOriginalMethod && AgentControl.hasAgentControl()) {
+        if (!useOriginalMethod && Controller.getInstance().hasAgentControl()) {
             ci.cancel();
         }
     }
@@ -73,7 +75,7 @@ public abstract class MouseHandlerMixin implements MouseHandlerAccessor {
 
     @Inject(method = "onMove(JDD)V", at = @At(value = "HEAD"), cancellable = true)
     private void injectOnMove(long handle, double xpos, double ypos, CallbackInfo ci) {
-        if (!useOriginalMethod && AgentControl.hasAgentControl()) {
+        if (!useOriginalMethod && Controller.getInstance().hasAgentControl()) {
             ci.cancel();
         }
     }
@@ -104,7 +106,7 @@ public abstract class MouseHandlerMixin implements MouseHandlerAccessor {
             useOriginalMethod = true;
             double scaleFactor = 1.0;
             if (this.minecraft.screen != null) {
-                double retinaFactor = (double) minecraft.getMainRenderTarget().viewWidth / minecraft.getWindow().getWidth();
+                final double retinaFactor = (double) minecraft.getMainRenderTarget().viewWidth / minecraft.getWindow().getWidth();
                 scaleFactor = minecraft.getWindow().getGuiScale() / retinaFactor;
             }
             double newX = this.xpos() + (xpos * (2400. / 360)) * scaleFactor;
@@ -129,18 +131,14 @@ public abstract class MouseHandlerMixin implements MouseHandlerAccessor {
         }
     }
 
-    /**
-     * @author decahedron
-     * @reason Prevent `cursorEntered` from setting `ignoreFirstMove = true`
-     */
     @Overwrite
     public void cursorEntered() {
-        // null
+        // prevent it from setting ignoreFirstMove to true
     }
 
     @Redirect(method = "grabMouse()V", at = @At(value = "FIELD", target = "Lnet/minecraft/client/MouseHandler;ignoreFirstMove:Z", opcode = Opcodes.PUTFIELD))
     private void injectGrabMouseIgnoreFirstMove(MouseHandler instance, boolean value) {
-        // null
+        // don't set the field
     }
 
     @Redirect(method = "onMove(JDD)V", at = @At(value = "FIELD", target = "Lnet/minecraft/client/MouseHandler;ignoreFirstMove:Z", opcode = Opcodes.GETFIELD))

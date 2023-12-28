@@ -2,6 +2,8 @@ package io.pyke.vitri.finorza.inference.config;
 
 import com.google.gson.*;
 import io.pyke.vitri.finorza.inference.FinorzaInference;
+import io.pyke.vitri.finorza.inference.config.option.BooleanConfigOption;
+import io.pyke.vitri.finorza.inference.config.option.EnumConfigOption;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.util.GsonHelper;
 

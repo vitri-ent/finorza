@@ -21,7 +21,11 @@ public class ClientRecipeBookMixin {
             at = @At(value = "INVOKE", shift = At.Shift.AFTER, target = "Ljava/util/ArrayList;add(Ljava/lang/Object;)Z"),
             locals = LocalCapture.CAPTURE_FAILHARD
     )
-    private static void injectCategorize(Iterable<Recipe<?>> iterable, CallbackInfoReturnable<Map<RecipeBookCategories, List<List<Recipe<?>>>>> cir, ArrayList<Recipe<?>> list) {
+    private static void injectCategorize(
+            Iterable<Recipe<?>> iterable,
+            CallbackInfoReturnable<Map<RecipeBookCategories, List<List<Recipe<?>>>>> cir,
+            ArrayList<Recipe<?>> list
+    ) {
         list.sort(Comparator.comparing(r -> r.getResultItem().toString()));
     }
 

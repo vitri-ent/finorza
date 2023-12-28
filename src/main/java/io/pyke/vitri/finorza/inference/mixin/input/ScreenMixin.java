@@ -7,11 +7,7 @@ import org.spongepowered.asm.mixin.Overwrite;
 
 @Mixin(Screen.class)
 public class ScreenMixin {
-    /**
-     * @author decahedron
-     * @reason need this override for container GUIs
-     */
-    @Overwrite
+    @Overwrite // need this override for container GUIs
     public static boolean hasShiftDown() {
         final KeyboardHandlerAccessor handler = ((KeyboardHandlerAccessor) Minecraft.getInstance().keyboardHandler);
         return handler.vitri$isKeyPressed(340) || handler.vitri$isKeyPressed(344);

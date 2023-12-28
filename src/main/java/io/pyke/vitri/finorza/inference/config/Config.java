@@ -5,6 +5,8 @@ import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 
 import com.google.gson.annotations.SerializedName;
+import io.pyke.vitri.finorza.inference.config.option.BooleanConfigOption;
+import io.pyke.vitri.finorza.inference.config.option.EnumConfigOption;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.Option;
 import net.minecraft.client.gui.screens.GenericDirtMessageScreen;

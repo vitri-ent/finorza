@@ -26,7 +26,7 @@ public class TitleScreenMixin {
     @Inject(method = "render(Lcom/mojang/blaze3d/vertex/PoseStack;IIF)V", at = @At(value = "HEAD"))
     private void injectRender(PoseStack poseStack, int mouseX, int mouseY, float partialTicks, CallbackInfo ci) {
         if (this.fadeInStart == 0L && this.fading) {
-            Window window = Minecraft.getInstance().getWindow();
+            final Window window = Minecraft.getInstance().getWindow();
             GLFW.glfwSetInputMode(window.getWindow(), GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
         }
     }
