@@ -1,5 +1,12 @@
 package io.pyke.vitri.finorza.inference.config;
 
+import com.google.gson.*;
+import io.pyke.vitri.finorza.inference.FinorzaInference;
+import io.pyke.vitri.finorza.inference.config.option.BooleanConfigOption;
+import io.pyke.vitri.finorza.inference.config.option.EnumConfigOption;
+import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.util.GsonHelper;
+
 import java.io.*;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
@@ -7,14 +14,12 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.Locale;
 
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-import com.google.gson.JsonPrimitive;
-import net.fabricmc.loader.api.FabricLoader;
-
-import io.pyke.vitri.finorza.inference.FinorzaInference;
-
 public class ConfigManager {
+	private static final Gson GSON = new GsonBuilder()
+			.setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
+			.setPrettyPrinting()
+			.create();
+
 	private static File file;
 
 	private static void prepareConfigFile() {
@@ -39,7 +44,7 @@ public class ConfigManager {
 
 			if (file.exists()) {
 				BufferedReader br = new BufferedReader(new FileReader(file));
-				JsonObject json = JsonParser.parseReader(br).getAsJsonObject();
+				JsonObject json = GsonHelper.parse(br);
 
 				for (Field field : Config.class.getDeclaredFields()) {
 					if (Modifier.isStatic(field.getModifiers()) && Modifier.isFinal(field.getModifiers())) {
@@ -109,7 +114,7 @@ public class ConfigManager {
 			e.printStackTrace();
 		}
 
-		String jsonString = FinorzaInference.GSON.toJson(config);
+		String jsonString = GSON.toJson(config);
 
 		try (FileWriter fileWriter = new FileWriter(file)) {
 			fileWriter.write(jsonString);

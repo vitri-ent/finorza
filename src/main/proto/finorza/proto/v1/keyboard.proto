@@ -1,0 +1,33 @@
+syntax = "proto3";
+
+package finorza.proto.v1;
+
+option java_multiple_files = true;
+option java_package = "io.pyke.vitri.finorza.inference.rpc.proto.v1";
+
+enum Key {
+  FORWARD = 0;
+  BACK = 1;
+  LEFT = 2;
+  RIGHT = 3;
+  JUMP = 4;
+  SPRINT = 5;
+  SNEAK = 6;
+  HOTBAR_1 = 7;
+  HOTBAR_2 = 8;
+  HOTBAR_3 = 9;
+  HOTBAR_4 = 10;
+  HOTBAR_5 = 11;
+  HOTBAR_6 = 12;
+  HOTBAR_7 = 13;
+  HOTBAR_8 = 14;
+  HOTBAR_9 = 15;
+  INVENTORY = 16;
+  DROP = 17;
+  SWAP_HANDS = 18;
+  ESC = 19;
+}
+
+message KeyboardState {
+  repeated Key key = 1;
+}

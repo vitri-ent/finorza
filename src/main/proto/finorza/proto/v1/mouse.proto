@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+package finorza.proto.v1;
+
+option java_multiple_files = true;
+option java_package = "io.pyke.vitri.finorza.inference.rpc.proto.v1";
+
+message Camera {
+  double dx = 1;
+  double dy = 2;
+}
+
+message MouseWheel {
+  double delta = 1;
+}
+
+enum MouseButton {
+  ATTACK = 0;
+  USE = 1;
+  PICK_ITEM = 2;
+}
+
+message MouseState {
+  Camera camera = 1;
+  repeated MouseButton button = 2;
+}

@@ -1,0 +1,54 @@
+syntax = "proto3";
+
+package finorza.proto.v1;
+
+option java_multiple_files = true;
+option java_package = "io.pyke.vitri.finorza.inference.rpc.proto.v1";
+
+import "google/protobuf/empty.proto";
+import "finorza/proto/v1/keyboard.proto";
+import "finorza/proto/v1/mouse.proto";
+
+message World {
+	string id = 1;
+	string name = 2;
+	bytes icon = 3;
+}
+
+message ListWorldsResponse {
+	repeated World worlds = 1;
+}
+
+message EnterWorldRequest {
+	string id = 1;
+}
+
+message EnterServerRequest {
+	string addr = 1;
+}
+
+message ObserveResponse {
+	optional bytes data = 1;
+	bool done = 2;
+	bool gui_open = 3;
+	bool paused = 4;
+}
+
+message ActRequest {
+	finorza.proto.v1.MouseState mouse = 1;
+	finorza.proto.v1.KeyboardState keyboard = 2;
+}
+
+message UpdateHumanControlRequest {
+	bool enabled = 1;
+}
+
+service RemoteControlService {
+	rpc ListWorlds(google.protobuf.Empty) returns (ListWorldsResponse);
+	rpc EnterWorld(EnterWorldRequest) returns (google.protobuf.Empty);
+	rpc EnterServer(EnterServerRequest) returns (google.protobuf.Empty);
+
+	rpc Observe(google.protobuf.Empty) returns (ObserveResponse);
+	rpc Act(ActRequest) returns (google.protobuf.Empty);
+	rpc UpdateHumanControl(UpdateHumanControlRequest) returns (google.protobuf.Empty);
+}

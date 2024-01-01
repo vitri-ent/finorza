@@ -1,17 +1,17 @@
 {
 	"required": true,
 	"minVersion": "0.8",
-	"package": "io.pyke.vitri.finorza.inference.mixins",
+	"package": "io.pyke.vitri.finorza.inference.mixin",
 	"compatibilityLevel": "JAVA_8",
 	"client": [
-		"MixinClientRecipeBook",
-		"MixinMinecraft",
-		"input.MixinKeyboardHandler",
-		"input.MixinMouseHandler",
-		"input.MixinScreen",
-		"render.MixinGameRenderer",
-		"render.MixinInputConstants",
-		"render.MixinTitleScreen",
-		"render.MixinWindow"
+		"ClientRecipeBookMixin",
+		"MinecraftMixin",
+		"input.KeyboardHandlerMixin",
+		"input.MouseHandlerMixin",
+		"input.ScreenMixin",
+		"render.GameRendererMixin",
+		"render.InputConstantsMixin",
+		"render.TitleScreenMixin",
+		"render.WindowMixin"
 	]
 }
