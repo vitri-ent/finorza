@@ -1,5 +1,6 @@
 package io.pyke.vitri.finorza.inference.mixin.input;
 
+import io.pyke.vitri.finorza.inference.api.MouseHandlerAccessor;
 import io.pyke.vitri.finorza.inference.util.Controller;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.MouseHandler;

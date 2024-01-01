@@ -1,7 +1,7 @@
 package io.pyke.vitri.finorza.inference.mixin.render;
 
 import com.mojang.blaze3d.platform.InputConstants;
-import io.pyke.vitri.finorza.inference.mixin.input.KeyboardHandlerAccessor;
+import io.pyke.vitri.finorza.inference.api.KeyboardHandlerAccessor;
 import net.minecraft.client.Minecraft;
 import org.lwjgl.glfw.GLFW;
 import org.spongepowered.asm.mixin.Mixin;

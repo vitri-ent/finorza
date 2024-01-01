@@ -1,5 +1,6 @@
 package io.pyke.vitri.finorza.inference.mixin.input;
 
+import io.pyke.vitri.finorza.inference.api.KeyboardHandlerAccessor;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import org.spongepowered.asm.mixin.Mixin;

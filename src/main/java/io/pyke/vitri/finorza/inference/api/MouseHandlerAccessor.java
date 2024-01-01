@@ -1,4 +1,4 @@
-package io.pyke.vitri.finorza.inference.mixin.input;
+package io.pyke.vitri.finorza.inference.api;
 
 public interface MouseHandlerAccessor {
 	void vitri$onPress(int button, int action, int mods);

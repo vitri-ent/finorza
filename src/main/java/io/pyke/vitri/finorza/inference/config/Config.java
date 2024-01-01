@@ -13,7 +13,7 @@ import net.minecraft.client.gui.screens.GenericDirtMessageScreen;
 import net.minecraft.client.gui.screens.TitleScreen;
 import net.minecraft.network.chat.TextComponent;
 
-import io.pyke.vitri.finorza.inference.mixin.render.WindowAccessor;
+import io.pyke.vitri.finorza.inference.api.WindowAccessor;
 import io.pyke.vitri.finorza.inference.gui.ModOptionsScreen;
 
 public class Config {
