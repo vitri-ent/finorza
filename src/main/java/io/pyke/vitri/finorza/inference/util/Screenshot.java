@@ -55,6 +55,14 @@ public class Screenshot { // NOT thread safe!
 			return this.resizeBuffer; // no data
 		}
 
+		if (this.width == this.resizeWidth && this.height == this.resizeHeight) {
+			// Only do the Y flip
+			for (int y = 0; y < this.height - 1; y++) {
+				this.resizeBuffer.put((this.height - 1 - y) * this.width * 3, this.buffer, y * this.width * 3, this.width * 3);
+			}
+			return this.resizeBuffer;
+		}
+
 		final double wr = (double) this.width / this.resizeWidth;
 		final double hr = (double) this.height / this.resizeHeight;
 		for (int y = 0; y < this.resizeHeight; y++) {
