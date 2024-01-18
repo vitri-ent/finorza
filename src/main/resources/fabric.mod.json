@@ -1,9 +1,9 @@
 {
 	"schemaVersion": 1,
-	"id": "finorza-inference",
+	"id": "${name}",
 	"version": "${version}",
 	"name": "Finorza Inference",
-	"description": "Interface for VITRI Project",
+	"description": "${description}",
 	"authors": [
 		"pyke.io"
 	],
