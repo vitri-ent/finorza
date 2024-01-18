@@ -16,9 +16,10 @@ grpc-stub = { group = "io.grpc", name = "grpc-stub", version.ref = "grpc" }
 grpc-services = { group = "io.grpc", name = "grpc-services", version.ref = "grpc" }
 grpc-protobuf = { group = "io.grpc", name = "grpc-protobuf", version.ref = "grpc" }
 grpc-protobuf-lite = { group = "io.grpc", name = "grpc-protobuf-lite", version.ref = "grpc" }
-grpc-netty-shaded = { group = "io.grpc", name = "grpc-netty-shaded", version.ref = "grpc" }
+grpc-netty = { group = "io.grpc", name = "grpc-netty", version.ref = "grpc" }
 tomcat-annotations = { group = "org.apache.tomcat", name = "annotations-api", version = "6.0.53" }
 protobuf-java = { group = "com.google.protobuf", name = "protobuf-java", version.ref = "protobuf" }
+perfmark-api = { group = "io.perfmark", name = "perfmark-api", version = "0.27.0" }
 # other mods
 modmenu = { group = "com.terraformersmc", name = "modmenu", version = "1.16.23" }
 

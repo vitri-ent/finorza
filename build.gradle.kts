@@ -19,9 +19,13 @@ repositories {
 }
 
 val includeImplementation by configurations.registering
+val includeRuntimeOnly by configurations.registering
+
 configurations {
     implementation.get().extendsFrom(includeImplementation.get())
-    include.get().extendsFrom(includeImplementation.get())
+    runtimeOnly.get().extendsFrom(includeRuntimeOnly.get())
+
+    include.get().extendsFrom(includeImplementation.get(), includeRuntimeOnly.get())
 }
 
 dependencies {
@@ -43,6 +47,9 @@ dependencies {
     modImplementation(libs.fabric.api)
     modImplementation(libs.modmenu)
 
+    // gRPC's Netty and Guava are not included, since Minecraft has them out of the box
+    // they are older than the dependency expects, but ABI should be ok for what we need
+
     compileOnly(libs.tomcat.annotations)
     includeImplementation(libs.grpc.api)
     includeImplementation(libs.grpc.core)
@@ -51,8 +58,9 @@ dependencies {
     includeImplementation(libs.grpc.services)
     includeImplementation(libs.grpc.protobuf)
     includeImplementation(libs.grpc.protobuf.lite)
-    includeImplementation(libs.grpc.netty.shaded)
+    includeImplementation(libs.grpc.netty)
     includeImplementation(libs.protobuf.java)
+    includeRuntimeOnly(libs.perfmark.api)
 }
 
 loom {
