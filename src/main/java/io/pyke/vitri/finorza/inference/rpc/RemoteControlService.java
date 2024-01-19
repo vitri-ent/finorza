@@ -36,7 +36,7 @@ public class RemoteControlService extends RemoteControlServiceGrpc.RemoteControl
     private ActRequest lastAction = null;
 
     public RemoteControlService() {
-        this(new Screenshot(), Minecraft.getInstance());
+        this(new Screenshot(640, 360), Minecraft.getInstance());
     }
 
     public RemoteControlService(@NotNull Screenshot screenshot, @NotNull Minecraft minecraft) {
@@ -144,7 +144,7 @@ public class RemoteControlService extends RemoteControlServiceGrpc.RemoteControl
                 RenderSystem.recordRenderCall(() -> frameFuture.complete(this.screenshot.read()));
 
                 frameFuture.join(); // just join onto the gRPC thread
-                builder.setData(ByteString.copyFrom(this.screenshot.resize()));
+                builder.setData(ByteString.copyFrom(this.screenshot.resize(Screenshot.InterpolationMethod.LINEAR)));
             }
         }
 
