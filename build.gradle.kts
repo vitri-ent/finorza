@@ -19,9 +19,13 @@ repositories {
 }
 
 val includeImplementation by configurations.registering
+val includeRuntimeOnly by configurations.registering
+
 configurations {
     implementation.get().extendsFrom(includeImplementation.get())
-    include.get().extendsFrom(includeImplementation.get())
+    runtimeOnly.get().extendsFrom(includeRuntimeOnly.get())
+
+    include.get().extendsFrom(includeImplementation.get(), includeRuntimeOnly.get())
 }
 
 dependencies {
@@ -53,6 +57,7 @@ dependencies {
     includeImplementation(libs.grpc.protobuf.lite)
     includeImplementation(libs.grpc.netty.shaded)
     includeImplementation(libs.protobuf.java)
+    includeRuntimeOnly(libs.perfmark.api)
 }
 
 loom {
