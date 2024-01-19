@@ -1,16 +1,19 @@
 package io.pyke.vitri.finorza.inference.rpc;
 
+import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.file.Files;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.CompletableFuture;
+
 import com.google.protobuf.ByteString;
 import com.google.protobuf.Empty;
 import com.mojang.blaze3d.systems.RenderSystem;
+import io.grpc.stub.ServerCallStreamObserver;
 import io.grpc.stub.StreamObserver;
-import io.pyke.vitri.finorza.inference.api.KeyboardHandlerAccessor;
-import io.pyke.vitri.finorza.inference.api.MouseHandlerAccessor;
-import io.pyke.vitri.finorza.inference.gui.ConnectScreenWithCallback;
-import io.pyke.vitri.finorza.inference.rpc.proto.v1.*;
-import io.pyke.vitri.finorza.inference.util.Controller;
-import io.pyke.vitri.finorza.inference.util.LevelUtil;
-import io.pyke.vitri.finorza.inference.util.Screenshot;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.ChatScreen;
 import net.minecraft.client.gui.screens.TitleScreen;
@@ -21,14 +24,13 @@ import net.minecraft.world.level.storage.LevelStorageException;
 import net.minecraft.world.level.storage.LevelSummary;
 import org.jetbrains.annotations.NotNull;
 
-import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.nio.file.Files;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.concurrent.CompletableFuture;
+import io.pyke.vitri.finorza.inference.api.KeyboardHandlerAccessor;
+import io.pyke.vitri.finorza.inference.api.MouseHandlerAccessor;
+import io.pyke.vitri.finorza.inference.gui.ConnectScreenWithCallback;
+import io.pyke.vitri.finorza.inference.rpc.proto.v1.*;
+import io.pyke.vitri.finorza.inference.util.Controller;
+import io.pyke.vitri.finorza.inference.util.LevelUtil;
+import io.pyke.vitri.finorza.inference.util.Screenshot;
 
 public class RemoteControlService extends RemoteControlServiceGrpc.RemoteControlServiceImplBase {
     private final Screenshot screenshot;
@@ -130,7 +132,7 @@ public class RemoteControlService extends RemoteControlServiceGrpc.RemoteControl
     }
 
     @Override
-    public void observe(Empty request, StreamObserver<ObserveResponse> response) {
+    public void observe(Empty request, StreamObserver<ObserveResponse> plainResponse) {
         final boolean isGuiOpen = minecraft.screen != null;
         final boolean isPaused = isGuiOpen && !(minecraft.screen instanceof ChatScreen || minecraft.screen instanceof AbstractContainerScreen<?>);
         final ObserveResponse.Builder builder = ObserveResponse.newBuilder()
@@ -138,13 +140,16 @@ public class RemoteControlService extends RemoteControlServiceGrpc.RemoteControl
                 .setGuiOpen(isGuiOpen)
                 .setPaused(isPaused || !Controller.getInstance().hasAgentControl());
 
+        final ServerCallStreamObserver<ObserveResponse> response = (ServerCallStreamObserver<ObserveResponse>)plainResponse;
+
         if (!isPaused) {
+            response.setCompression("gzip");
             synchronized (this.screenshot) {
                 final CompletableFuture<ByteBuffer> frameFuture = new CompletableFuture<>();
                 RenderSystem.recordRenderCall(() -> frameFuture.complete(this.screenshot.read()));
 
                 frameFuture.join(); // just join onto the gRPC thread
-                builder.setData(ByteString.copyFrom(this.screenshot.resize(Screenshot.InterpolationMethod.LINEAR)));
+                builder.setData(ByteString.copyFrom(this.screenshot.resize(Screenshot.InterpolationMethod.NEAREST_NEIGHBOR)));
             }
         }
 
