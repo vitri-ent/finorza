@@ -4,6 +4,7 @@ import java.util.function.Function;
 
 import com.mojang.blaze3d.platform.Window;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.Option;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.server.IntegratedServer;
 import net.minecraft.server.MinecraftServer;
@@ -32,12 +33,12 @@ public class MinecraftMixin {
     @Shadow
     public ClientLevel level;
 
-    @Overwrite // override frame rate limit to 20 (server ticks per second) if SYNCHRONIZE_INTEGRATED_SERVER is enabled
+    @Overwrite // uncap frame rate limit if SYNCHRONIZE_INTEGRATED_SERVER is enabled
     private int getFramerateLimit() {
         if (this.level == null) {
             return 60;
         } else if (Config.SYNCHRONIZE_INTEGRATED_SERVER.getValue()) {
-            return 20;
+            return (int)Option.FRAMERATE_LIMIT.getMaxValue();
         }
 
         return this.window.getFramerateLimit();
