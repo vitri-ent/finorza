@@ -5,10 +5,17 @@
 	"name": "Finorza Inference",
 	"description": "${description}",
 	"authors": [
-		"pyke.io"
+		"Carson M",
+		"Matouš Kučera"
 	],
+	"license": "Apache-2.0",
+	"contact": {
+		"email": "carson@pyke.io",
+		"homepage": "https://github.com/vitri-ent/finorza",
+		"sources": "https://github.com/vitri-ent/finorza",
+		"issues": "https://github.com/vitri-ent/finorza/issues"
+	},
 	"environment": "client",
-	"license": "PROPRIETARY",
 	"entrypoints": {
 		"client": [
 			"io.pyke.vitri.finorza.inference.FinorzaInference"
@@ -25,6 +32,6 @@
 	"depends": {
 		"fabricloader": ">=0.8.0",
 		"minecraft": "=1.16.5",
-		"fabric-api": "*"
+		"fabric": "~0.42.0"
 	}
 }
