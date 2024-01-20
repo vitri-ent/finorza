@@ -24,6 +24,7 @@
 	"accessWidener": "finorza.accesswidener",
 	"depends": {
 		"fabricloader": ">=0.8.0",
-		"minecraft": "=1.16.5"
+		"minecraft": "=1.16.5",
+		"fabric-api": "*"
 	}
 }
