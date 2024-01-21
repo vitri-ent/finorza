@@ -1,5 +1,6 @@
 package io.pyke.vitri.finorza.inference.mixin.input;
 
+import io.pyke.vitri.finorza.inference.FinorzaInference;
 import io.pyke.vitri.finorza.inference.api.KeyboardHandlerAccessor;
 import io.pyke.vitri.finorza.inference.util.Controller;
 import net.minecraft.client.KeyboardHandler;
@@ -33,7 +34,7 @@ public abstract class KeyboardHandlerMixin implements KeyboardHandlerAccessor {
 
     @Inject(method = "keyPress(JIIII)V", at = @At(value = "HEAD"), cancellable = true)
     private void injectKeyPress(long windowPointer, int key, int scanCode, int action, int modifiers, CallbackInfo ci) {
-        if (key == GLFW.GLFW_KEY_PAGE_DOWN && action == 1) {
+        if (FinorzaInference.agentControlToggle.matches(key, scanCode) && action == 1) {
             Controller.getInstance().toggleHumanControl();
             return;
         }
@@ -44,14 +45,14 @@ public abstract class KeyboardHandlerMixin implements KeyboardHandlerAccessor {
             keysPressed.add(key);
         }
 
-        if (!useOriginalMethod && Controller.getInstance().hasAgentControl() && key != GLFW.GLFW_KEY_ESCAPE) {
+        if (!useOriginalMethod && Controller.getInstance().shouldBlockControls() && key != GLFW.GLFW_KEY_ESCAPE) {
             ci.cancel();
         }
     }
 
     @Inject(method = "charTyped(JII)V", at = @At(value = "HEAD"), cancellable = true)
     private void injectCharTyped(long windowPointer, int codePoint, int modifiers, CallbackInfo ci) {
-        if (!useOriginalMethod && Controller.getInstance().hasAgentControl()) {
+        if (!useOriginalMethod && Controller.getInstance().shouldBlockControls()) {
             ci.cancel();
         }
     }

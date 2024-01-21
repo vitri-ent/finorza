@@ -1,11 +1,14 @@
 package io.pyke.vitri.finorza.inference.mixin;
 
+import java.util.OptionalInt;
 import java.util.function.Function;
 
+import com.mojang.blaze3d.platform.DisplayData;
 import com.mojang.blaze3d.platform.Window;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.Option;
 import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.renderer.VirtualScreen;
 import net.minecraft.client.server.IntegratedServer;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
@@ -20,6 +23,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
 import io.pyke.vitri.finorza.inference.config.Config;
+import io.pyke.vitri.finorza.inference.config.ConfigManager;
 
 @Mixin(Minecraft.class)
 public class MinecraftMixin {
@@ -33,15 +37,27 @@ public class MinecraftMixin {
     @Shadow
     public ClientLevel level;
 
-    @Overwrite // uncap frame rate limit if SYNCHRONIZE_INTEGRATED_SERVER is enabled
+    @Overwrite // uncap frame rate limit if synchronizeIntegratedServer is enabled
     private int getFramerateLimit() {
         if (this.level == null) {
             return 60;
-        } else if (Config.SYNCHRONIZE_INTEGRATED_SERVER.getValue()) {
+        } else if (ConfigManager.getConfig().synchronizeIntegratedServer) {
             return (int)Option.FRAMERATE_LIMIT.getMaxValue();
         }
 
         return this.window.getFramerateLimit();
+    }
+
+    @Redirect(
+        method = "<init>(Lnet/minecraft/client/main/GameConfig;)V",
+        at = @At(
+            value = "INVOKE",
+            target = "Lnet/minecraft/client/renderer/VirtualScreen;newWindow(Lcom/mojang/blaze3d/platform/DisplayData;Ljava/lang/String;Ljava/lang/String;)Lcom/mojang/blaze3d/platform/Window;"
+        )
+    )
+    private Window redirectNewWindow(VirtualScreen instance, DisplayData screenSize, String videoModeName, String title) {
+        Config.WindowSize windowSize = ConfigManager.getConfig().windowSize;
+        return instance.newWindow(new DisplayData(windowSize.width, windowSize.height, OptionalInt.empty(), OptionalInt.empty(), false), videoModeName, title);
     }
 
     @Redirect(
@@ -53,7 +69,7 @@ public class MinecraftMixin {
     )
     @SuppressWarnings("unchecked")
     private <S extends MinecraftServer> S redirectCreateIntegratedServer(Function<Thread, S> threadFunction) {
-        if (Config.SYNCHRONIZE_INTEGRATED_SERVER.getValue()) {
+        if (ConfigManager.getConfig().synchronizeIntegratedServer) {
             final IntegratedServer server = (IntegratedServer) threadFunction.apply(Thread.currentThread());
             server.initServer();
             server.tickServer(server::haveTime);
@@ -73,8 +89,8 @@ public class MinecraftMixin {
             locals = LocalCapture.CAPTURE_FAILHARD
     )
     private void injectTick(boolean renderLevel, CallbackInfo ci, long l, int i, int j) {
-        // tick server if SYNCHRONIZE_INTEGRATED_SERVER is enabled
-        if (this.singleplayerServer != null && Config.SYNCHRONIZE_INTEGRATED_SERVER.getValue()) {
+        // tick server if synchronizeIntegratedServer is enabled
+        if (this.singleplayerServer != null && ConfigManager.getConfig().synchronizeIntegratedServer) {
             this.singleplayerServer.tickServer(() -> false);
             this.singleplayerServer.mayHaveDelayedTasks = true;
             while (this.singleplayerServer.pollTask());
@@ -90,6 +106,6 @@ public class MinecraftMixin {
             at = @At(value = "INVOKE", target = "Lnet/minecraft/client/server/IntegratedServer;isShutdown()Z")
     )
     private boolean redirectIsShutdown(IntegratedServer instance) {
-        return Config.SYNCHRONIZE_INTEGRATED_SERVER.getValue() || instance.isShutdown();
+        return ConfigManager.getConfig().synchronizeIntegratedServer || instance.isShutdown();
     }
 }

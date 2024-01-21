@@ -4,6 +4,8 @@ import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import io.pyke.vitri.finorza.inference.config.Config;
+import io.pyke.vitri.finorza.inference.config.ConfigManager;
+
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.texture.TextureManager;
@@ -15,7 +17,7 @@ public final class MouseCursor {
     }
 
     public static void render(PoseStack matrixStack, Screen screen, int x, int y) {
-        final int size = Config.CURSOR_SIZE.getValue().size;
+        final int size = ConfigManager.getConfig().cursorSize.size;
 
         RenderSystem.enableTexture();
         RenderSystem.disableLighting();

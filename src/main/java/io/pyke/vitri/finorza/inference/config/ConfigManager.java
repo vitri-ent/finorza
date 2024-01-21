@@ -1,24 +1,30 @@
 package io.pyke.vitri.finorza.inference.config;
 
-import com.google.gson.*;
 import io.pyke.vitri.finorza.inference.FinorzaInference;
-import io.pyke.vitri.finorza.inference.config.option.BooleanConfigOption;
-import io.pyke.vitri.finorza.inference.config.option.EnumConfigOption;
+
+import com.google.gson.*;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.util.GsonHelper;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.*;
-import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
-import java.util.Locale;
 
 public class ConfigManager {
 	private static final Gson GSON = new GsonBuilder()
-			.setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
-			.setPrettyPrinting()
-			.create();
+		.setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
+		.setPrettyPrinting()
+		.excludeFieldsWithModifiers(Modifier.PRIVATE)
+		.create();
+
+	private static Config config = null;
+
+	public static @NotNull Config getConfig() {
+		if (ConfigManager.config == null) {
+			ConfigManager.initializeConfig();
+		}
+		return ConfigManager.config;
+	}
 
 	private static File file;
 
@@ -33,7 +39,6 @@ public class ConfigManager {
 		load();
 	}
 
-	@SuppressWarnings("unchecked")
 	private static void load() {
 		prepareConfigFile();
 
@@ -42,81 +47,31 @@ public class ConfigManager {
 				save();
 			}
 
-			if (file.exists()) {
-				BufferedReader br = new BufferedReader(new FileReader(file));
-				JsonObject json = GsonHelper.parse(br);
-
-				for (Field field : Config.class.getDeclaredFields()) {
-					if (Modifier.isStatic(field.getModifiers()) && Modifier.isFinal(field.getModifiers())) {
-						if (BooleanConfigOption.class.isAssignableFrom(field.getType())) {
-							JsonPrimitive primitive = json.getAsJsonPrimitive(field.getName().toLowerCase(Locale.ROOT));
-							if (primitive != null && primitive.isBoolean()) {
-								BooleanConfigOption option = (BooleanConfigOption) field.get(null);
-								ConfigOptionStorage.setBoolean(option.getKey(), primitive.getAsBoolean());
-							}
-						} else if (EnumConfigOption.class.isAssignableFrom(
-							field.getType()) && field.getGenericType() instanceof ParameterizedType) {
-							JsonPrimitive primitive = json.getAsJsonPrimitive(field.getName().toLowerCase(Locale.ROOT));
-							if (primitive != null && primitive.isString()) {
-								Type generic = ((ParameterizedType) field.getGenericType()).getActualTypeArguments()[0];
-								if (generic instanceof Class<?>) {
-									EnumConfigOption<?> option = (EnumConfigOption<?>) field.get(null);
-									Enum<?> found = null;
-									for (Enum<?> value : ((Class<Enum<?>>) generic).getEnumConstants()) {
-										if (value.name().toLowerCase(Locale.ROOT).equals(primitive.getAsString())) {
-											found = value;
-											break;
-										}
-									}
-									if (found != null) {
-										ConfigOptionStorage.setEnumTypeless(option.getKey(), found);
-									}
-								}
-							}
-						}
-					}
-				}
-			}
-		} catch (FileNotFoundException | IllegalAccessException e) {
+			BufferedReader br = new BufferedReader(new FileReader(file));
+			JsonObject json = GsonHelper.parse(br);
+			ConfigManager.config = GSON.fromJson(json, Config.class);
+			FinorzaInference.LOGGER.info("Loaded config from " + file.getAbsolutePath());
+		} catch (FileNotFoundException e) {
 			e.printStackTrace();
+		} finally {
+			if (ConfigManager.config == null) {
+				FinorzaInference.LOGGER.warn("Loading default config");
+				ConfigManager.config = new Config();
+			}
 		}
 	}
 
-	@SuppressWarnings("unchecked")
 	public static void save() {
 		prepareConfigFile();
 
-		JsonObject config = new JsonObject();
-
-		try {
-			for (Field field : Config.class.getDeclaredFields()) {
-				if (Modifier.isStatic(field.getModifiers()) && Modifier.isFinal(field.getModifiers())) {
-					if (BooleanConfigOption.class.isAssignableFrom(field.getType())) {
-						BooleanConfigOption option = (BooleanConfigOption) field.get(null);
-						config.addProperty(field.getName().toLowerCase(Locale.ROOT),
-						                   ConfigOptionStorage.getBoolean(option.getKey())
-						);
-					} else if (EnumConfigOption.class.isAssignableFrom(
-						field.getType()) && field.getGenericType() instanceof ParameterizedType) {
-						Type generic = ((ParameterizedType) field.getGenericType()).getActualTypeArguments()[0];
-						if (generic instanceof Class<?>) {
-							EnumConfigOption<?> option = (EnumConfigOption<?>) field.get(null);
-							config.addProperty(field.getName().toLowerCase(Locale.ROOT),
-							                   ConfigOptionStorage.getEnumTypeless(option.getKey(),
-							                                                       (Class<Enum<?>>) generic
-							                   ).name().toLowerCase(Locale.ROOT)
-							);
-						}
-					}
-				}
-			}
-		} catch (IllegalAccessException e) {
-			e.printStackTrace();
+		if (ConfigManager.config == null) {
+			FinorzaInference.LOGGER.warn("Loading default config");
+			ConfigManager.config = new Config();
 		}
-
-		String jsonString = GSON.toJson(config);
+		String jsonString = GSON.toJson(ConfigManager.config);
 
 		try (FileWriter fileWriter = new FileWriter(file)) {
+			FinorzaInference.LOGGER.warn("Saving config to " + file.getAbsolutePath());
 			fileWriter.write(jsonString);
 		} catch (IOException e) {
 			e.printStackTrace();

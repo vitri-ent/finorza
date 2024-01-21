@@ -52,7 +52,7 @@ public abstract class MouseHandlerMixin implements MouseHandlerAccessor {
             buttonsPressed.add(button);
         }
 
-        if (!useOriginalMethod && Controller.getInstance().hasAgentControl()) {
+        if (!useOriginalMethod && Controller.getInstance().shouldBlockControls()) {
             ci.cancel();
         }
     }
@@ -64,7 +64,7 @@ public abstract class MouseHandlerMixin implements MouseHandlerAccessor {
 
     @Inject(method = "onScroll(JDD)V", at = @At(value = "HEAD"), cancellable = true)
     private void injectOnScroll(long handle, double xoffset, double yoffset, CallbackInfo ci) {
-        if (!useOriginalMethod && Controller.getInstance().hasAgentControl()) {
+        if (!useOriginalMethod && Controller.getInstance().shouldBlockControls()) {
             ci.cancel();
         }
     }
@@ -76,7 +76,7 @@ public abstract class MouseHandlerMixin implements MouseHandlerAccessor {
 
     @Inject(method = "onMove(JDD)V", at = @At(value = "HEAD"), cancellable = true)
     private void injectOnMove(long handle, double xpos, double ypos, CallbackInfo ci) {
-        if (!useOriginalMethod && Controller.getInstance().hasAgentControl()) {
+        if (!useOriginalMethod && Controller.getInstance().shouldBlockControls()) {
             ci.cancel();
         }
     }

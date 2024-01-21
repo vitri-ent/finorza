@@ -22,6 +22,7 @@ protobuf-java = { group = "com.google.protobuf", name = "protobuf-java", version
 perfmark-api = { group = "io.perfmark", name = "perfmark-api", version = "0.27.0" }
 # other mods
 modmenu = { group = "com.terraformersmc", name = "modmenu", version = "1.16.23" }
+cloth-config = { group = "me.shedaniel.cloth", name = "cloth-config-fabric", version = "4.17.101" }
 
 [plugins]
 fabric-loom = { id = "fabric-loom", version = "1.3-SNAPSHOT" }

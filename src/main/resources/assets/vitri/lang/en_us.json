@@ -1,14 +1,33 @@
 {
-	"finorza-inference.option.synchronizeIntegratedServer": "Sync ticks: %s",
-	"finorza-inference.option.synchronizeIntegratedServer.false": "OFF",
-	"finorza-inference.option.synchronizeIntegratedServer.true": "ON",
-	"finorza-inference.option.cursorSize": "Cursor size: %s",
-	"finorza-inference.option.cursorSize.px_4": "4x4",
-	"finorza-inference.option.cursorSize.px_8": "8x8",
-	"finorza-inference.option.cursorSize.px_16": "16x16",
-	"finorza-inference.option.windowSize": "Window size: %s",
-	"finorza-inference.option.windowSize.r_360": "360p",
-	"finorza-inference.option.windowSize.r_480": "480p",
-	"finorza-inference.option.windowSize.r_720": "720p",
-	"finorza-inference.option.windowSize.r_1080": "1080p"
+	"finorza-inference.display": "Fiиorza",
+
+	"finorza-inference.alert.control.agent": "Agent controls",
+	"finorza-inference.alert.control.human": "Operator controls",
+
+	"finorza-inference.keybind.toggleAgentControl": "Toggle Agent Control",
+
+	"finorza-inference.option.rendering.display": "Rendering",
+	"finorza-inference.option.rendering.observationFrameSize.display": "Observation frame size",
+	"finorza-inference.option.rendering.observationFrameSize.description": "Configures the output size of observation frames.\n%1$s: Resizes the observation frames to 640x360, matching MineRL's behavior.\n%2$s: Resizes the observation frames to ACT-RViT's input size.\n%3$s: Sends observation frames in the native window resolution with no resizing.",
+	"finorza-inference.option.rendering.observationFrameSize.minerl": "MineRL",
+	"finorza-inference.option.rendering.observationFrameSize.act_rvit": "ACT-RViT",
+	"finorza-inference.option.rendering.observationFrameSize.native": "Native",
+	"finorza-inference.option.rendering.cursorSize.display": "Cursor size",
+	"finorza-inference.option.rendering.cursorSize.px_4": "4x4",
+	"finorza-inference.option.rendering.cursorSize.px_8": "8x8",
+	"finorza-inference.option.rendering.cursorSize.px_16": "16x16",
+	"finorza-inference.option.rendering.windowSize.display": "Window size",
+	"finorza-inference.option.rendering.windowSize.r_360": "640x360",
+	"finorza-inference.option.rendering.windowSize.r_480": "854x480",
+	"finorza-inference.option.rendering.windowSize.r_720": "1280x720",
+	"finorza-inference.option.rendering.windowSize.r_1080": "1920x1080",
+
+	"finorza-inference.option.rpc.display": "RPC",
+	"finorza-inference.option.rpc.controlPort.display": "Port",
+	"finorza-inference.option.rpc.compressObservation.display": "Compress observation response",
+	"finorza-inference.option.rpc.compressObservation.description": "Compress the response returned by /Observe using gzip, reducing bytes sent over network but increasing CPU usage. This can be particularly useful if you set %1$s to %2$s and are rendering at a high native resolution.",
+
+	"finorza-inference.option.world.display": "World",
+	"finorza-inference.option.world.synchronizeTick.display": "Synchronize tick to action",
+	"finorza-inference.option.world.synchronizeTick.description": "Ticks the integrated server on each observation request, allowing the game to run faster than real time. Useful for evaluating agent performance."
 }

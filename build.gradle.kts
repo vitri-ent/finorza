@@ -15,6 +15,7 @@ description = "A Minecraft mod for simulating autonomous agents."
 repositories {
     mavenCentral()
     maven("https://maven.parchmentmc.org")
+    maven("https://maven.shedaniel.me/")
     maven("https://maven.terraformersmc.com/releases")
 }
 
@@ -46,6 +47,9 @@ dependencies {
     modImplementation(libs.fabric.loader)
     modImplementation(libs.fabric.api)
     modImplementation(libs.modmenu)
+    modImplementation(libs.cloth.config) {
+        exclude("net.fabricmc.fabric-api")
+    }
 
     compileOnly(libs.tomcat.annotations)
     includeImplementation(libs.grpc.api)

@@ -4,7 +4,6 @@ import com.mojang.blaze3d.platform.DisplayData;
 import com.mojang.blaze3d.platform.ScreenManager;
 import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.platform.WindowEventHandler;
-import io.pyke.vitri.finorza.inference.api.WindowAccessor;
 import org.lwjgl.glfw.GLFW;
 import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.At;
@@ -13,10 +12,11 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import static org.lwjgl.glfw.GLFW.GLFW_DECORATED;
-import static org.lwjgl.glfw.GLFW.GLFW_FALSE;
-import static org.lwjgl.glfw.GLFW.GLFW_RESIZABLE;
-import static org.lwjgl.glfw.GLFW.GLFW_TRUE;
+import io.pyke.vitri.finorza.inference.api.WindowAccessor;
+import io.pyke.vitri.finorza.inference.config.Config;
+import io.pyke.vitri.finorza.inference.config.ConfigManager;
+
+import static org.lwjgl.glfw.GLFW.*;
 
 @Mixin(Window.class)
 public abstract class WindowMixin implements WindowAccessor {
