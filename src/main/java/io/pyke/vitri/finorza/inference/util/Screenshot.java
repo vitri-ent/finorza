@@ -1,7 +1,6 @@
 package io.pyke.vitri.finorza.inference.util;
 
 import com.mojang.blaze3d.pipeline.RenderTarget;
-import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.Minecraft;
 import org.jetbrains.annotations.NotNull;
 import org.lwjgl.opengl.GL11;
@@ -34,9 +33,6 @@ public class Screenshot { // NOT thread safe!
 			this.buffer.rewind();
 		}
 
-		RenderSystem.pushMatrix();
-		target.blitToScreen(this.width, this.height);
-		RenderSystem.popMatrix();
 		GL11.glReadPixels(0, 0, this.width, this.height, GL11.GL_RGB, GL11.GL_UNSIGNED_BYTE, this.buffer);
 
 		return this.buffer;
