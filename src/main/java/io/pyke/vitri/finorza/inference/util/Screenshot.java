@@ -18,9 +18,9 @@ public class Screenshot { // NOT thread safe!
 		this.resizeHeight = resizeHeight;
 	}
 
-	public void setResizeSize(int resizeWidth, int resizeHeight) {
-		this.resizeWidth = resizeWidth;
-		this.resizeHeight = resizeHeight;
+	public void setResizeSize(Integer resizeWidth, Integer resizeHeight) {
+		this.resizeWidth = resizeWidth != null ? resizeWidth : this.width;
+		this.resizeHeight = resizeHeight != null ? resizeHeight : this.height;
 	}
 
 	public @NotNull ByteBuffer read() {

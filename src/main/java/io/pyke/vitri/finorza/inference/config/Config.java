@@ -37,8 +37,16 @@ public final class Config {
 	}
 
 	public enum ObservationFrameSize {
-		@SerializedName("minerl") MineRL,
-		@SerializedName("act-rvit") ACT_RViT,
-		@SerializedName("native") Native;
+		@SerializedName("minerl") MineRL(640, 360),
+		@SerializedName("act-rvit") ACT_RViT(128, 128),
+		@SerializedName("native") Native(null, null);
+
+		public final Integer width;
+		public final Integer height;
+
+		ObservationFrameSize(Integer width, Integer height) {
+			this.width = width;
+			this.height = height;
+		}
 	}
 }

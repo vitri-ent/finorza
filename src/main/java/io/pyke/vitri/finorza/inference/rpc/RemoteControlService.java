@@ -27,6 +27,7 @@ import org.lwjgl.glfw.GLFW;
 
 import io.pyke.vitri.finorza.inference.api.KeyboardHandlerAccessor;
 import io.pyke.vitri.finorza.inference.api.MouseHandlerAccessor;
+import io.pyke.vitri.finorza.inference.config.Config;
 import io.pyke.vitri.finorza.inference.config.ConfigManager;
 import io.pyke.vitri.finorza.inference.gui.ConnectScreenWithCallback;
 import io.pyke.vitri.finorza.inference.rpc.proto.v1.*;
@@ -150,6 +151,9 @@ public class RemoteControlService extends RemoteControlServiceGrpc.RemoteControl
             if (ConfigManager.getConfig().compressObservation) {
                 response.setCompression("gzip");
             }
+
+            Config.ObservationFrameSize observationFrameSize = ConfigManager.getConfig().observationFrameSize;
+            this.screenshot.setResizeSize(observationFrameSize.width, observationFrameSize.height);
 
             synchronized (this.screenshot) {
                 final CompletableFuture<ByteBuffer> frameFuture = new CompletableFuture<>();
