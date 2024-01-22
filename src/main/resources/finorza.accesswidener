@@ -2,6 +2,7 @@ accessWidener v2 named
 
 accessible method net/minecraft/server/MinecraftServer haveTime ()Z
 accessible method net/minecraft/server/MinecraftServer waitUntilNextTick ()V
+accessible method net/minecraft/client/ClientRecipeBook getCategory (Lnet/minecraft/world/item/crafting/Recipe;)Lnet/minecraft/client/RecipeBookCategories;
 
 accessible field net/minecraft/server/MinecraftServer isReady Z
 accessible field net/minecraft/server/MinecraftServer mayHaveDelayedTasks Z
