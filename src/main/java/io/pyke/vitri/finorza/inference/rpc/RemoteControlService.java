@@ -50,7 +50,7 @@ public class RemoteControlService extends RemoteControlServiceGrpc.RemoteControl
         this.minecraft = minecraft;
     }
 
-    private static int vitriKeyToCode(Key key) {
+    private int vitriKeyToCode(Key key) {
         return switch (key) {
             case FORWARD -> GLFW.GLFW_KEY_W;
             case BACK -> GLFW.GLFW_KEY_S;
@@ -60,7 +60,14 @@ public class RemoteControlService extends RemoteControlServiceGrpc.RemoteControl
             case SNEAK -> GLFW.GLFW_KEY_LEFT_SHIFT;
             case SPRINT -> GLFW.GLFW_KEY_LEFT_CONTROL;
             case ESC -> GLFW.GLFW_KEY_ESCAPE;
-            case INVENTORY -> GLFW.GLFW_KEY_E;
+            case INVENTORY -> {
+                if (minecraft.screen instanceof AbstractContainerScreen<?>) {
+                    // Use escape instead of E to prevent a race condition which crashes the game.
+                    yield GLFW.GLFW_KEY_ESCAPE;
+                } else {
+                    yield GLFW.GLFW_KEY_E;
+                }
+            }
             case SWAP_HANDS -> GLFW.GLFW_KEY_F;
             case DROP -> GLFW.GLFW_KEY_Q;
             case HOTBAR_1 -> GLFW.GLFW_KEY_1;
