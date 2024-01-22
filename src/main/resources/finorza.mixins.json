@@ -6,6 +6,8 @@
 	"client": [
 		"ClientRecipeBookMixin",
 		"MinecraftMixin",
+		"ducttape.RecipeBookComponentMixin",
+		"ducttape.RecipeButtonMixin",
 		"input.KeyboardHandlerMixin",
 		"input.MouseHandlerMixin",
 		"input.ScreenMixin",
