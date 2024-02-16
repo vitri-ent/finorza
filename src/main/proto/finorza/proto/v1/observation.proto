@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+package finorza.proto.v1;
+
+option java_multiple_files = true;
+option java_package = "io.pyke.vitri.finorza.inference.rpc.proto.v1";
+
+message ObservationFrame {
+  bytes data = 1;
+  uint32 width = 2;
+  uint32 height = 3;
+}
+
+message ObservationData {
+  ObservationFrame frame = 1;
+  optional string biome = 2;
+  optional bool above_ground = 3;
+  optional bool on_ground = 4;
+  optional bool swimming = 5;
+  optional bool raining = 6;
+  optional float health = 7;
+}

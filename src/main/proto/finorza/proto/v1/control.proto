@@ -8,6 +8,7 @@ option java_package = "io.pyke.vitri.finorza.inference.rpc.proto.v1";
 import "google/protobuf/empty.proto";
 import "finorza/proto/v1/keyboard.proto";
 import "finorza/proto/v1/mouse.proto";
+import "finorza/proto/v1/observation.proto";
 
 message World {
 	string id = 1;
@@ -28,7 +29,7 @@ message EnterServerRequest {
 }
 
 message ObserveResponse {
-	optional bytes data = 1;
+	optional finorza.proto.v1.ObservationData data = 1;
 	bool done = 2;
 	bool gui_open = 3;
 	bool paused = 4;
@@ -48,6 +49,7 @@ service RemoteControlService {
 	rpc EnterWorld(EnterWorldRequest) returns (google.protobuf.Empty);
 	rpc EnterServer(EnterServerRequest) returns (google.protobuf.Empty);
 
+	rpc Respawn(google.protobuf.Empty) returns (google.protobuf.Empty);
 	rpc Observe(google.protobuf.Empty) returns (ObserveResponse);
 	rpc Act(ActRequest) returns (google.protobuf.Empty);
 	rpc UpdateHumanControl(UpdateHumanControlRequest) returns (google.protobuf.Empty);

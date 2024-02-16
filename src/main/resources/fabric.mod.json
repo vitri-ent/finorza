@@ -2,7 +2,7 @@
 	"schemaVersion": 1,
 	"id": "${name}",
 	"version": "${version}",
-	"name": "Finorza Inference",
+	"name": "Fiиorza",
 	"description": "${description}",
 	"authors": [
 		"Carson M",
@@ -32,6 +32,10 @@
 	"depends": {
 		"fabricloader": ">=0.8.0",
 		"minecraft": "=1.16.5",
+		"cloth-config2": "~4.17.101",
 		"fabric": "~0.42.0"
+	},
+	"recommends": {
+		"mod-menu": "~1.16"
 	}
 }

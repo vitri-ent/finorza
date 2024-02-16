@@ -23,6 +23,14 @@ public class Screenshot { // NOT thread safe!
 		this.resizeHeight = resizeHeight != null ? resizeHeight : this.height;
 	}
 
+	public int getResizeWidth() {
+		return resizeWidth;
+	}
+
+	public int getResizeHeight() {
+		return resizeHeight;
+	}
+
 	public @NotNull ByteBuffer read() {
 		final RenderTarget target = Minecraft.getInstance().getMainRenderTarget();
 		if (target.width != width || target.height != height) {

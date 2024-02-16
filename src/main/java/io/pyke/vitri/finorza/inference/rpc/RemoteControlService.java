@@ -15,11 +15,14 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import io.grpc.stub.ServerCallStreamObserver;
 import io.grpc.stub.StreamObserver;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screens.ChatScreen;
+import net.minecraft.client.gui.screens.DeathScreen;
 import net.minecraft.client.gui.screens.TitleScreen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.multiplayer.ServerData;
+import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.resources.language.I18n;
+import net.minecraft.core.Registry;
+import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.storage.LevelStorageException;
 import net.minecraft.world.level.storage.LevelSummary;
 import org.jetbrains.annotations.NotNull;
@@ -144,17 +147,28 @@ public class RemoteControlService extends RemoteControlServiceGrpc.RemoteControl
     }
 
     @Override
+    public void respawn(Empty request, StreamObserver<Empty> response) {
+        if (this.minecraft.player != null && this.minecraft.player.isDeadOrDying()) {
+            this.minecraft.player.respawn();
+        }
+        response.onNext(Empty.getDefaultInstance());
+        response.onCompleted();
+    }
+
+    @Override
     public void observe(Empty request, StreamObserver<ObserveResponse> plainResponse) {
         final boolean isGuiOpen = minecraft.screen != null;
         final boolean isPaused = isGuiOpen && !ScreenUtil.isAgentControllableScreen(minecraft.screen);
         final ObserveResponse.Builder builder = ObserveResponse.newBuilder()
-            .setDone(false)
+            .setDone(minecraft.screen instanceof DeathScreen)
             .setGuiOpen(isGuiOpen)
             .setPaused(isPaused || !Controller.getInstance().hasAgentControl());
 
         final ServerCallStreamObserver<ObserveResponse> response = (ServerCallStreamObserver<ObserveResponse>)plainResponse;
 
         if (!isPaused) {
+            assert this.minecraft.level != null;
+
             if (ConfigManager.getConfig().compressObservation) {
                 response.setCompression("gzip");
             }
@@ -167,7 +181,26 @@ public class RemoteControlService extends RemoteControlServiceGrpc.RemoteControl
                 RenderSystem.recordRenderCall(() -> frameFuture.complete(this.screenshot.read()));
 
                 frameFuture.join(); // just join onto the gRPC thread
-                builder.setData(ByteString.copyFrom(this.screenshot.resize(Screenshot.InterpolationMethod.NEAREST_NEIGHBOR)));
+                final ByteString frame = ByteString.copyFrom(this.screenshot.resize(Screenshot.InterpolationMethod.NEAREST_NEIGHBOR));
+
+                final LocalPlayer player = this.minecraft.player;
+                assert player != null;
+
+	            final ObservationData.Builder dataBuilder = ObservationData.newBuilder()
+                    .setFrame(
+                        ObservationFrame.newBuilder()
+                            .setData(frame)
+                            .setWidth(this.screenshot.getResizeWidth())
+                            .setHeight(this.screenshot.getResizeHeight())
+                            .build()
+                    )
+                    .setAboveGround(this.minecraft.level.getBrightness(LightLayer.SKY, player.blockPosition()) >= 4)
+                    .setBiome(this.minecraft.level.registryAccess().registryOrThrow(Registry.BIOME_REGISTRY).getKey(this.minecraft.level.getBiome(player.blockPosition())).toString())
+                    .setHealth(player.getHealth())
+                    .setOnGround(player.isOnGround())
+                    .setRaining(player.isInWaterOrRain() && !player.isInWater())
+                    .setSwimming(player.isSwimming());
+                builder.setData(dataBuilder);
             }
         }
 
