@@ -9,7 +9,7 @@ plugins {
 }
 
 group = "io.pyke.vitri"
-version = "1.0.0"
+version = "2.0.0"
 description = "A Minecraft mod for simulating autonomous agents."
 
 repositories {
